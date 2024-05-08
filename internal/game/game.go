@@ -76,7 +76,7 @@ func (game *Game) Run() (string, error) {
 	}
 
 	duration := time.Since(startTime).Seconds()
-	speed := float64(game.WordCount) / duration / 60
+	speed := float64(game.WordCount) / (duration / 60)
 	accuracy := 100.0 - (float64(inaccuracy) / float64(len(text)) * 100)
 
 	result := fmt.Sprintf("\n\nwpm: %v\n", int(speed)) +
