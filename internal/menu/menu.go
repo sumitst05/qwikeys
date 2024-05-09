@@ -46,11 +46,16 @@ func (m *Menu) Print(items []MenuItem, selectedIndex int) {
 	fmt.Print("\033[94m")
 	fmt.Print("QwiKeys\n\n")
 
+	fmt.Print("\033[94m")
+	fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
+
 	fmt.Println("Select Mode:")
 	if m.SelectedMode != 0 && m.SelectedPlayers == 0 && m.SelectedTheme == 0 {
 		fmt.Print("\033[H\033[2J")
 		fmt.Print("\033[94m")
 		fmt.Print("QwiKeys\n\n")
+		fmt.Print("\033[94m")
+		fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
 		fmt.Println("Select Number of Players:")
 	}
 
@@ -58,6 +63,8 @@ func (m *Menu) Print(items []MenuItem, selectedIndex int) {
 		fmt.Print("\033[H\033[2J")
 		fmt.Print("\033[94m")
 		fmt.Print("QwiKeys\n\n")
+		fmt.Print("\033[94m")
+		fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
 		fmt.Println("Select Theme:")
 	}
 
@@ -88,8 +95,12 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int) int {
 		}
 
 		switch key {
+		case keyboard.KeyCtrlW:
+			selectedIndex = (selectedIndex - 1 + len(items)) % len(items)
 		case keyboard.KeyArrowUp:
 			selectedIndex = (selectedIndex - 1 + len(items)) % len(items)
+		case keyboard.KeyCtrlS:
+			selectedIndex = (selectedIndex + 1) % len(items)
 		case keyboard.KeyArrowDown:
 			selectedIndex = (selectedIndex + 1) % len(items)
 		case keyboard.KeyEnter:
