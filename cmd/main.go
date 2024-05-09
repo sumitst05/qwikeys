@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"qwikeys/internal/game"
+	"qwikeys/internal/menu"
 )
 
 func main() {
+	menu := menu.NewMenu()
+	menu.Display()
+
+	// Clear screen
+	fmt.Print("\033[H\033[2J")
+
 	game := game.NewGame("./pkg/words.txt", 15)
 
 	result, err := game.Run()
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	fmt.Println(result)

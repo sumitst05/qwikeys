@@ -11,6 +11,7 @@ import (
 type Game struct {
 	WordListPath string
 	WordCount    int
+	Time         int
 }
 
 func NewGame(wordListPath string, wordCount int) *Game {
@@ -20,13 +21,16 @@ func NewGame(wordListPath string, wordCount int) *Game {
 	}
 }
 
-func (game *Game) Run() (string, error) {
-	words, err := ReadWordsFromFile(game.WordListPath)
+func (g *Game) Run() (string, error) {
+	fmt.Print("\033[94m")
+	fmt.Println("QwiKeys")
+
+	words, err := ReadWordsFromFile(g.WordListPath)
 	if err != nil {
 		return "", err
 	}
 
-	text := GenerateRandomString(words, game.WordCount)
+	text := GenerateRandomString(words, g.WordCount)
 	fmt.Print("\033[90m") // Set text color to gray
 	fmt.Print(text)
 
@@ -71,12 +75,12 @@ func (game *Game) Run() (string, error) {
 	}
 
 	if interrupt {
-		fmt.Println("Interrupt recieved. Exiting...")
-		os.Exit(1)
+		fmt.Println("\nInterrupt received. Exiting...")
+		os.Exit(130)
 	}
 
 	duration := time.Since(startTime).Seconds()
-	speed := float64(game.WordCount) / (duration / 60)
+	speed := float64(g.WordCount) / (duration / 60)
 	accuracy := 100.0 - (float64(inaccuracy) / float64(len(text)) * 100)
 
 	result := fmt.Sprintf("\n\nwpm: %v\n", int(speed)) +
