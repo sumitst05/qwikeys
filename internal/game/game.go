@@ -41,7 +41,8 @@ func (g *Game) Run() (string, error) {
 	defer keyboard.Close()
 
 	startTime := time.Now()
-	inaccuracy := 0
+	correctChars := 0
+	totalChars := len(text)
 	input := ""
 
 	for {
@@ -55,8 +56,8 @@ func (g *Game) Run() (string, error) {
 				input = input[:len(input)-1]
 			}
 		} else {
-			if len(input) < len(text) && charInput != rune(text[len(input)]) {
-				inaccuracy++
+			if len(input) < len(text) && charInput == rune(text[len(input)]) {
+				correctChars++
 			}
 			input += string(charInput)
 		}
@@ -74,11 +75,13 @@ func (g *Game) Run() (string, error) {
 	}
 
 	duration := time.Since(startTime).Seconds()
-	speed := float64(g.WordCount) / (duration / 60)
-	accuracy := 100.0 - (float64(inaccuracy) / float64(len(text)) * 100)
+	wpm := float64(correctChars) / 5.0 / (duration / 60)
+	rawWpm := float64(totalChars) / 5.0 / (duration / 60)
+	accuracy := (float64(correctChars) / float64(totalChars)) * 100
 
-	result := fmt.Sprintf("\n\nwpm: %v\n", int(speed)) +
-		fmt.Sprintf("accuracy: %v%%\n", int(accuracy)) +
+	result := fmt.Sprintf("\n\nwpm: %v\n", int(wpm)) +
+		fmt.Sprintf("raw: %v\n", int(rawWpm)) +
+		fmt.Sprintf("accuracy: %.2f%%\n", accuracy) +
 		fmt.Sprintf("time: %vs\n", int(duration))
 
 	return result, nil
