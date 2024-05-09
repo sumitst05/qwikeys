@@ -12,11 +12,12 @@ type MenuItem struct {
 }
 
 type Menu struct {
-	GameModes     []MenuItem
-	Themes        []MenuItem
-	Players       int
-	SelectedMode  int
-	SelectedTheme int
+	GameModes       []MenuItem
+	Themes          []MenuItem
+	Players         []MenuItem
+	SelectedMode    int
+	SelectedTheme   int
+	SelectedPlayers int
 }
 
 func NewMenu() *Menu {
@@ -29,14 +30,36 @@ func NewMenu() *Menu {
 			{Label: "Time Rush"},
 			{Label: "Word Sprint"},
 		},
-		SelectedMode:  0,
-		SelectedTheme: 0,
+		Players: []MenuItem{
+			{Label: "2"},
+			{Label: "3"},
+			{Label: "4"},
+			{Label: "5"},
+		},
+		SelectedMode:    0,
+		SelectedTheme:   0,
+		SelectedPlayers: 0,
 	}
 }
 
 func (m *Menu) Print(items []MenuItem, selectedIndex int) {
 	fmt.Print("\033[94m")
-	fmt.Println("QwiKeys")
+	fmt.Print("QwiKeys\n\n")
+
+	fmt.Println("Select Mode:")
+	if m.SelectedMode != 0 && m.SelectedPlayers == 0 && m.SelectedTheme == 0 {
+		fmt.Print("\033[H\033[2J")
+		fmt.Print("\033[94m")
+		fmt.Print("QwiKeys\n\n")
+		fmt.Println("Select Number of Players:")
+	}
+
+	if m.SelectedPlayers != 0 && m.SelectedTheme == 0 {
+		fmt.Print("\033[H\033[2J")
+		fmt.Print("\033[94m")
+		fmt.Print("QwiKeys\n\n")
+		fmt.Println("Select Theme:")
+	}
 
 	fmt.Print("\033[39m")
 	for i, item := range items {
@@ -48,7 +71,7 @@ func (m *Menu) Print(items []MenuItem, selectedIndex int) {
 	}
 }
 
-func (m *Menu) Select(items []MenuItem, selectedIndex int) {
+func (m *Menu) Select(items []MenuItem, selectedIndex int) int {
 	m.Print(items, selectedIndex)
 
 	err := keyboard.Open()
@@ -57,6 +80,7 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int) {
 	}
 	defer keyboard.Close()
 
+	interrupt := false
 	for {
 		_, key, err := keyboard.GetKey()
 		if err != nil {
@@ -69,10 +93,10 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int) {
 		case keyboard.KeyArrowDown:
 			selectedIndex = (selectedIndex + 1) % len(items)
 		case keyboard.KeyEnter:
-			return
+			return selectedIndex // Return the updated selectedIndex
 		case keyboard.KeyCtrlC:
-			fmt.Println("\nInterrupt received. Exiting...")
-			os.Exit(130)
+			interrupt = true
+			break
 		}
 
 		// Clear the screen and display the updated menu
@@ -84,20 +108,42 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int) {
 
 		// Move cursor to beginning of the line
 		fmt.Print("\033[G")
+
+		if interrupt {
+			break
+		}
 	}
+
+	if interrupt {
+		fmt.Println("\nInterrupt received. Exiting...")
+		os.Exit(130)
+	}
+
+	return selectedIndex
+}
+
+func (m *Menu) SelectPlayers() {
+	m.SelectedPlayers = m.Select(m.Players, m.SelectedPlayers)
 }
 
 func (m *Menu) SelectMode() {
-	m.Select(m.GameModes, m.SelectedMode)
+	m.SelectedMode = m.Select(m.GameModes, m.SelectedMode)
+
+	if m.SelectedMode == 1 {
+		m.SelectPlayers()
+	}
 }
 
 func (m *Menu) SelectTheme() {
-	m.Select(m.Themes, m.SelectedTheme)
+	m.SelectedTheme = m.Select(m.Themes, m.SelectedTheme)
 }
 
-func (m *Menu) Display() (int, int) {
+func (m *Menu) Display() (int, int, int) {
 	m.SelectMode()
+
 	fmt.Print("\033[H\033[2J")
+
 	m.SelectTheme()
-	return m.SelectedMode, m.SelectedTheme
+
+	return m.SelectedMode, m.SelectedTheme, m.SelectedPlayers
 }

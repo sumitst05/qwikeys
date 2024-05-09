@@ -8,7 +8,9 @@ import (
 
 func main() {
 	menu := menu.NewMenu()
-	menu.Display()
+	mode, theme, players := menu.Display()
+
+	fmt.Println(mode, theme, players)
 
 	// Clear screen
 	fmt.Print("\033[H\033[2J")

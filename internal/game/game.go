@@ -23,7 +23,7 @@ func NewGame(wordListPath string, wordCount int) *Game {
 
 func (g *Game) Run() (string, error) {
 	fmt.Print("\033[94m")
-	fmt.Println("QwiKeys")
+	fmt.Print("QwiKeys\n\n")
 
 	words, err := ReadWordsFromFile(g.WordListPath)
 	if err != nil {
@@ -44,7 +44,6 @@ func (g *Game) Run() (string, error) {
 	inaccuracy := 0
 	input := ""
 
-	interrupt := false
 	for {
 		charInput, key, err := keyboard.GetKey()
 		if err != nil {
@@ -65,18 +64,13 @@ func (g *Game) Run() (string, error) {
 		Colorize(text, input)
 
 		if key == keyboard.KeyCtrlC {
-			interrupt = true
-			break
+			fmt.Println("\nInterrupt received. Exiting...")
+			os.Exit(130)
 		}
 
 		if len(input) == len(text) {
 			break
 		}
-	}
-
-	if interrupt {
-		fmt.Println("\nInterrupt received. Exiting...")
-		os.Exit(130)
 	}
 
 	duration := time.Since(startTime).Seconds()
