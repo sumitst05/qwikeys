@@ -12,12 +12,24 @@ type MenuItem struct {
 }
 
 type Menu struct {
-	GameModes       []MenuItem
-	Themes          []MenuItem
-	Players         []MenuItem
-	SelectedMode    int
-	SelectedTheme   int
-	SelectedPlayers int
+	GameModes           []MenuItem
+	Themes              []MenuItem
+	Players             []MenuItem
+	WordCount           []MenuItem
+	TimeControl         []MenuItem
+	SelectedMode        int
+	SelectedTheme       int
+	SelectedPlayers     int
+	SelectedWordCount   int
+	SelectedTimeControl int
+}
+
+type GameOptions struct {
+	GameMode    int
+	Theme       int
+	Players     int
+	WordCount   int
+	TimeControl int
 }
 
 func NewMenu() *Menu {
@@ -36,37 +48,45 @@ func NewMenu() *Menu {
 			{Label: "4"},
 			{Label: "5"},
 		},
-		SelectedMode:    0,
-		SelectedTheme:   0,
-		SelectedPlayers: 0,
+		WordCount: []MenuItem{
+			{Label: "10"},
+			{Label: "20"},
+			{Label: "40"},
+			{Label: "80"},
+			{Label: "100"},
+		},
+		TimeControl: []MenuItem{
+			{Label: "15 seconds"},
+			{Label: "30 seconds"},
+			{Label: "45 seconds"},
+			{Label: "1 minute"},
+			{Label: "2 minutes"},
+		},
+		SelectedMode:        0,
+		SelectedTheme:       0,
+		SelectedPlayers:     0,
+		SelectedWordCount:   0,
+		SelectedTimeControl: 0,
 	}
 }
 
-func (m *Menu) Print(items []MenuItem, selectedIndex int) {
+func (m *Menu) clearScreen() {
+	fmt.Print("\033[H\033[2J")
+	fmt.Print("\033[94m")
+	fmt.Print("QwiKeys\n\n")
+	fmt.Print("\033[94m")
+	fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
+}
+
+func (m *Menu) Print(items []MenuItem, selectedIndex int, prompt string) {
 	fmt.Print("\033[94m")
 	fmt.Print("QwiKeys\n\n")
 
 	fmt.Print("\033[94m")
 	fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
 
-	fmt.Println("Select Mode:")
-	if m.SelectedMode != 0 && m.SelectedPlayers == 0 && m.SelectedTheme == 0 {
-		fmt.Print("\033[H\033[2J")
-		fmt.Print("\033[94m")
-		fmt.Print("QwiKeys\n\n")
-		fmt.Print("\033[94m")
-		fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
-		fmt.Println("Select Number of Players:")
-	}
-
-	if m.SelectedPlayers != 0 && m.SelectedTheme == 0 {
-		fmt.Print("\033[H\033[2J")
-		fmt.Print("\033[94m")
-		fmt.Print("QwiKeys\n\n")
-		fmt.Print("\033[94m")
-		fmt.Println("↑ / Ctrl+W   ↓ / Ctrl+S")
-		fmt.Println("Select Theme:")
-	}
+	m.clearScreen()
+	fmt.Println(prompt)
 
 	fmt.Print("\033[39m")
 	for i, item := range items {
@@ -78,8 +98,8 @@ func (m *Menu) Print(items []MenuItem, selectedIndex int) {
 	}
 }
 
-func (m *Menu) Select(items []MenuItem, selectedIndex int) int {
-	m.Print(items, selectedIndex)
+func (m *Menu) Select(items []MenuItem, selectedIndex int, prompt string) int {
+	m.Print(items, selectedIndex, prompt)
 
 	err := keyboard.Open()
 	if err != nil {
@@ -112,7 +132,7 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int) int {
 
 		// Clear the screen and display the updated menu
 		fmt.Print("\033[H\033[2J")
-		m.Print(items, selectedIndex)
+		m.Print(items, selectedIndex, prompt)
 
 		// Reset foreground color
 		fmt.Print("\033[39m")
@@ -133,28 +153,75 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int) int {
 	return selectedIndex
 }
 
-func (m *Menu) SelectPlayers() {
-	m.SelectedPlayers = m.Select(m.Players, m.SelectedPlayers)
-}
-
 func (m *Menu) SelectMode() {
-	m.SelectedMode = m.Select(m.GameModes, m.SelectedMode)
+	m.SelectedMode = m.Select(m.GameModes, m.SelectedMode, "Select Mode:")
 
 	if m.SelectedMode == 1 {
 		m.SelectPlayers()
 	}
 }
 
-func (m *Menu) SelectTheme() {
-	m.SelectedTheme = m.Select(m.Themes, m.SelectedTheme)
+func (m *Menu) SelectPlayers() {
+	m.SelectedPlayers = m.Select(m.Players, m.SelectedPlayers, "Select Players:")
 }
 
-func (m *Menu) Display() (int, int, int) {
+func (m *Menu) SelectTheme() {
+	m.SelectedTheme = m.Select(m.Themes, m.SelectedTheme, "Select Theme:")
+	if m.SelectedTheme == 0 {
+		m.SelectTimeControl()
+		switch m.SelectedTimeControl {
+		case 0:
+			m.SelectedWordCount = 10
+			m.SelectedTimeControl = 15
+		case 1:
+			m.SelectedWordCount = 20
+			m.SelectedTimeControl = 30
+		case 2:
+			m.SelectedWordCount = 30
+			m.SelectedTimeControl = 45
+		case 3:
+			m.SelectedWordCount = 40
+			m.SelectedTimeControl = 60
+		case 4:
+			m.SelectedWordCount = 80
+			m.SelectedTimeControl = 120
+		}
+	} else if m.SelectedTheme == 1 {
+		m.SelectWordCount()
+		switch m.SelectedWordCount {
+		case 0:
+			m.SelectedWordCount = 10
+		case 1:
+			m.SelectedWordCount = 20
+		case 2:
+			m.SelectedWordCount = 40
+		case 3:
+			m.SelectedWordCount = 80
+		case 4:
+			m.SelectedWordCount = 100
+		}
+	}
+}
+
+func (m *Menu) SelectTimeControl() {
+	m.SelectedTimeControl = m.Select(m.TimeControl, m.SelectedTimeControl, "Select Time Control:")
+}
+
+func (m *Menu) SelectWordCount() {
+	m.SelectedWordCount = m.Select(m.WordCount, m.SelectedWordCount, "Select Word Count:")
+}
+
+func (m *Menu) Display() *GameOptions {
 	m.SelectMode()
 
 	fmt.Print("\033[H\033[2J")
 
 	m.SelectTheme()
 
-	return m.SelectedMode, m.SelectedTheme, m.SelectedPlayers
+	return &GameOptions{
+		GameMode:    m.SelectedMode,
+		Players:     m.SelectedPlayers,
+		TimeControl: m.SelectedTimeControl,
+		WordCount:   m.SelectedWordCount,
+	}
 }

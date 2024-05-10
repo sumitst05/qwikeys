@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"time"
 )
 
 func ReadWordsFromFile(filename string) ([]string, error) {
@@ -41,7 +42,7 @@ func GenerateRandomString(words []string, wordCount int) string {
 	return text
 }
 
-func Colorize(text, input string) {
+func Colorize(text, input string, timeLimit int, startTime time.Time) {
 	output := ""
 	for i, char := range text {
 		if i < len(input) {
@@ -54,5 +55,23 @@ func Colorize(text, input string) {
 			output += "\033[90m" + string(char) + "\033[0m" // Gray for remaining characters
 		}
 	}
-	fmt.Print("\r", output)
+
+	fmt.Print("\033[H\033[2J") // Clear screen
+	fmt.Print("\033[94m")      // Blue for title
+	fmt.Print("QwiKeys\n\n")
+
+	fmt.Println(output)
+
+	if timeLimit > 0 {
+		go func() {
+			for {
+				remainingTime := timeLimit - int(time.Since(startTime).Seconds())
+				fmt.Printf("\rTime Left: %ds", remainingTime)
+				time.Sleep(time.Second)
+				if remainingTime == 0 {
+					return
+				}
+			}
+		}()
+	}
 }
