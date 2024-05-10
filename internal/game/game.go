@@ -24,6 +24,7 @@ func NewGame(wordListPath string, wordCount int, time int, players int) *Game {
 	}
 }
 
+// Run starts the game and returns the result.
 func (g *Game) Run() (string, error) {
 	fmt.Print("\033[94m")
 	fmt.Print("QwiKeys\n\n")
@@ -48,10 +49,50 @@ func (g *Game) Run() (string, error) {
 	totalChars := len(text)
 	input := ""
 
-	timer := time.NewTimer(time.Duration(g.Time) * time.Second)
-
 	done := make(chan bool)
 
+	// Time Rush
+	if g.Time > 0 {
+		timer := time.NewTimer(time.Duration(g.Time) * time.Second)
+
+		go func() {
+			for {
+				select {
+				case <-timer.C:
+					duration := time.Since(startTime).Seconds()
+					wpm := float64(correctChars) / 5.0 / (duration / 60)
+					rawWpm := float64(totalChars) / 5.0 / (duration / 60)
+					accuracy := (float64(correctChars) / float64(totalChars)) * 100
+
+					result := fmt.Sprintf("\n\nwpm: %v\n", int(wpm)) +
+						fmt.Sprintf("raw: %v\n", int(rawWpm)) +
+						fmt.Sprintf("accuracy: %.2f%%\n", accuracy) +
+						fmt.Sprintf("time: %vs\n", int(duration))
+
+					fmt.Println(result)
+					done <- true
+					return
+
+				case <-done:
+					duration := time.Since(startTime).Seconds()
+					wpm := float64(correctChars) / 5.0 / (duration / 60)
+					rawWpm := float64(totalChars) / 5.0 / (duration / 60)
+					accuracy := (float64(correctChars) / float64(totalChars)) * 100
+
+					result := fmt.Sprintf("\n\nwpm: %v\n", math.Round(wpm)) +
+						fmt.Sprintf("raw: %v\n", math.Round(rawWpm)) +
+						fmt.Sprintf("accuracy: %v%%\n", math.Round(accuracy)) +
+						fmt.Sprintf("time: %vs\n", math.Round(duration))
+
+					fmt.Println(result)
+					done <- true
+					return
+				}
+			}
+		}()
+	}
+
+	// Word Sprint
 	go func() {
 		for {
 			char, key, err := keyboard.GetKey()
@@ -84,19 +125,6 @@ func (g *Game) Run() (string, error) {
 
 	for {
 		select {
-		case <-timer.C:
-			duration := time.Since(startTime).Seconds()
-			wpm := float64(correctChars) / 5.0 / (duration / 60)
-			rawWpm := float64(totalChars) / 5.0 / (duration / 60)
-			accuracy := (float64(correctChars) / float64(totalChars)) * 100
-
-			result := fmt.Sprintf("\n\nwpm: %v\n", int(wpm)) +
-				fmt.Sprintf("raw: %v\n", int(rawWpm)) +
-				fmt.Sprintf("accuracy: %.2f%%\n", accuracy) +
-				fmt.Sprintf("time: %vs\n", int(duration))
-
-			return result, nil
-
 		case <-done:
 			duration := time.Since(startTime).Seconds()
 			wpm := float64(correctChars) / 5.0 / (duration / 60)
@@ -109,7 +137,6 @@ func (g *Game) Run() (string, error) {
 				fmt.Sprintf("time: %vs\n", math.Round(duration))
 
 			return result, nil
-
 		default:
 			Colorize(text, input, g.Time, startTime)
 			time.Sleep(100 * time.Millisecond)
