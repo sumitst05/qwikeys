@@ -62,6 +62,7 @@ func Colorize(text, input string, timeLimit int, startTime time.Time) {
 
 	fmt.Println(output)
 
+	// If time rush theme is selected
 	if timeLimit > 0 {
 		go func() {
 			for {

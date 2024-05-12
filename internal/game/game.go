@@ -50,7 +50,7 @@ func (g *Game) Run() (string, error) {
 
 	done := make(chan bool)
 
-	// Time Rush
+	// If time rush theme is selected
 	if g.Time > 0 {
 		timer := time.NewTimer(time.Duration(g.Time) * time.Second)
 
@@ -58,17 +58,6 @@ func (g *Game) Run() (string, error) {
 			for {
 				select {
 				case <-timer.C:
-					duration := time.Since(startTime).Seconds()
-					wpm := float64(correctChars) / 5.0 / (duration / 60)
-					rawWpm := float64(totalChars) / 5.0 / (duration / 60)
-					accuracy := (float64(correctChars) / float64(totalChars)) * 100
-
-					result := fmt.Sprintf("\n\nwpm: %v\n", int(wpm)) +
-						fmt.Sprintf("raw: %v\n", int(rawWpm)) +
-						fmt.Sprintf("accuracy: %.2f%%\n", accuracy) +
-						fmt.Sprintf("time: %vs\n", int(duration))
-
-					fmt.Println(result)
 					done <- true
 					return
 				}
@@ -76,7 +65,6 @@ func (g *Game) Run() (string, error) {
 		}()
 	}
 
-	// Word Sprint
 	go func() {
 		for {
 			char, key, err := keyboard.GetKey()
