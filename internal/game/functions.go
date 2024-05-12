@@ -60,7 +60,11 @@ func Colorize(text, input string, timeLimit int, startTime time.Time) {
 	fmt.Print("\033[94m")      // Blue for title
 	fmt.Print("QwiKeys\n\n")
 
-	fmt.Println(output)
+	if timeLimit > 0 {
+		fmt.Println(output)
+	} else {
+		fmt.Print(output)
+	}
 
 	// If time rush theme is selected
 	if timeLimit > 0 {
