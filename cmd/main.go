@@ -16,7 +16,7 @@ func main() {
 	// Clear screen
 	fmt.Print("\033[H\033[2J")
 
-	game := game.NewGame("./pkg/words.txt", options.WordCount, options.TimeControl, options.Players)
+	game := game.NewGame("./pkg/words.txt", options.WordCount, options.TimeControl)
 
 	result, err := game.Run()
 	if err != nil {

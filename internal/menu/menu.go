@@ -12,41 +12,25 @@ type MenuItem struct {
 }
 
 type Menu struct {
-	GameModes           []MenuItem
 	Themes              []MenuItem
-	Players             []MenuItem
 	WordCount           []MenuItem
 	TimeControl         []MenuItem
-	SelectedMode        int
 	SelectedTheme       int
-	SelectedPlayers     int
 	SelectedWordCount   int
 	SelectedTimeControl int
 }
 
 type GameOptions struct {
-	GameMode    int
 	Theme       int
-	Players     int
 	WordCount   int
 	TimeControl int
 }
 
 func NewMenu() *Menu {
 	return &Menu{
-		GameModes: []MenuItem{
-			{Label: "Single Player"},
-			{Label: "Multi Player"},
-		},
 		Themes: []MenuItem{
 			{Label: "Time Rush"},
 			{Label: "Word Sprint"},
-		},
-		Players: []MenuItem{
-			{Label: "2"},
-			{Label: "3"},
-			{Label: "4"},
-			{Label: "5"},
 		},
 		WordCount: []MenuItem{
 			{Label: "10"},
@@ -62,9 +46,7 @@ func NewMenu() *Menu {
 			{Label: "1 minute"},
 			{Label: "2 minutes"},
 		},
-		SelectedMode:        0,
 		SelectedTheme:       0,
-		SelectedPlayers:     0,
 		SelectedWordCount:   0,
 		SelectedTimeControl: 0,
 	}
@@ -153,18 +135,6 @@ func (m *Menu) Select(items []MenuItem, selectedIndex int, prompt string) int {
 	return selectedIndex
 }
 
-func (m *Menu) SelectMode() {
-	m.SelectedMode = m.Select(m.GameModes, m.SelectedMode, "Select Mode:")
-
-	if m.SelectedMode == 1 {
-		m.SelectPlayers()
-	}
-}
-
-func (m *Menu) SelectPlayers() {
-	m.SelectedPlayers = m.Select(m.Players, m.SelectedPlayers, "Select Players:")
-}
-
 func (m *Menu) SelectTheme() {
 	m.SelectedTheme = m.Select(m.Themes, m.SelectedTheme, "Select Theme:")
 	if m.SelectedTheme == 0 {
@@ -212,15 +182,11 @@ func (m *Menu) SelectWordCount() {
 }
 
 func (m *Menu) Display() *GameOptions {
-	m.SelectMode()
-
 	fmt.Print("\033[H\033[2J")
 
 	m.SelectTheme()
 
 	return &GameOptions{
-		GameMode:    m.SelectedMode,
-		Players:     m.SelectedPlayers,
 		TimeControl: m.SelectedTimeControl,
 		WordCount:   m.SelectedWordCount,
 	}

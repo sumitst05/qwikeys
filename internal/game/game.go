@@ -12,15 +12,13 @@ type Game struct {
 	WordListPath string
 	WordCount    int
 	Time         int
-	Players      int
 }
 
-func NewGame(wordListPath string, wordCount int, time int, players int) *Game {
+func NewGame(wordListPath string, wordCount int, time int) *Game {
 	return &Game{
 		WordListPath: wordListPath,
 		WordCount:    wordCount,
 		Time:         time,
-		Players:      players,
 	}
 }
 
