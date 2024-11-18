@@ -9,6 +9,7 @@ QwiKeys is a CLI based typing game designed to test your typing speed and accura
 
 ## How to Play
 
+- Run the application with `go run cmd/main.go`
 - Choose a theme and customize settings such as word count and time limit.
 - Start typing the displayed text as accurately and quickly as possible.
 - View your typing speed, accuracy, and other stats at the end of the game.
